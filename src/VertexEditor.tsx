@@ -42,10 +42,10 @@ export const VertexEditor: React.FC<VertexEditorProps> = ({
       pointsPositions[i * 3 + 2] = vertex.position.z;
     });
     pointsGeometry.setAttribute('position', new BufferAttribute(pointsPositions, 3));
-    
-    const pointsMaterial = new PointsMaterial({ 
-      size: 0.05, 
-      color: 0xff0000 
+
+    const pointsMaterial = new PointsMaterial({
+      size: 0.05,
+      color: 0xff0000
     });
     const points = new Points(pointsGeometry, pointsMaterial);
     scene.add(points);

@@ -2,31 +2,28 @@ Basic CAD web application using React and Three.js. Here are the key components 
 
 Core Technologies:
 
-
-Three.js for 3D rendering
-React for the UI framework
-STL file format support for import/export
-OrbitControls for camera manipulation
+-[x] Three.js for 3D rendering
+-[x] React for the UI framework
+-[x] STL file format support for import/export
+-[x] OrbitControls for camera manipulation
 
 
 Current Features:
 
+-[x] Import/export STL files (three.js api)
+-[x] Add basic shapes (cube, sphere, cylinder)
+-[x] Orbit, pan, and zoom controls
+-[x] Responsive canvas
+-[x] Basic lighting setup
+-[x] Rotate / scale / move object
 
-Import/export STL files
-Add basic shapes (cube, sphere, cylinder)
-Orbit, pan, and zoom controls
-Responsive canvas
-Basic lighting setup
+Features missing for it to be a full CAD application:
 
-
-To expand this into a full CAD application, you'd want to add:
-
-
-Boolean operations (union, difference, intersection)
-Advanced mesh editing tools
-Measurement tools
-Snap-to-grid and alignment tools
-Undo/redo functionality
-Layer management
-Materials and textures
-Custom geometry creation tools
+-[ ] Boolean operations (union, difference, intersection)
+-[ ] Advanced mesh editing tools
+-[ ] Measurement tools
+-[ ] Snap-to-grid and alignment tools
+-[ ] Undo/redo functionality
+-[ ] Layer management
+-[ ] Materials and textures
+-[ ] Custom geometry creation tools

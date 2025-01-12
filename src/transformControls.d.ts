@@ -2,7 +2,7 @@ import { Object3D, Camera } from 'three';
 
 declare class TransformControls extends Object3D {
   constructor(camera: Camera, domElement?: HTMLElement);
-  
+
   // Properties
   camera: Camera;
   domElement: HTMLElement;
@@ -11,7 +11,7 @@ declare class TransformControls extends Object3D {
   showX: boolean;
   showY: boolean;
   showZ: boolean;
-  
+
   // Methods
   attach(object: Object3D): this;
   detach(): this;

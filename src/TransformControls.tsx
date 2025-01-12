@@ -19,10 +19,10 @@ export const TransformControls: React.FC<TransformControlsProps> = ({
     const controls = new ThreeTransformControls(camera, domElement);
     controls.attach(object);
     controls.setMode(mode);
-    
+
     // Instead of adding the controls to the scene, we just need to attach them to the object
     // The control's visual elements will be automatically added to the scene
-    
+
     const onObjectChange = () => {
       // Update object when transformed
       object.updateMatrix();

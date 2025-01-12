@@ -38,14 +38,14 @@ const App: React.FC = () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
     camera.position.z = 5;
 
-    // Add lights
+    // Ambient lights
     const ambientLight = new THREE.AmbientLight(0x404040);
     const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
     directionalLight.position.set(1, 1, 1);
     scene.add(ambientLight);
     scene.add(directionalLight);
 
-    // Add orbit controls
+    // Orbit controls
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
 
