@@ -1,12 +1,15 @@
+// App.tsx
 import React, { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { STLExporter } from 'three/addons/exporters/STLExporter.js';
 import { STLLoader } from 'three/addons/loaders/STLLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { EditMode, EditableVertex, SceneState, ShapeType } from './types';
-import styles from './App.module.css';
 import { TransformControls } from './TransformControls';
 import { VertexEditor } from './VertexEditor';
+import { ScadEditor } from './ScadEditor';
+import { scadService } from './scadService';
+import styles from './App.module.css';
 
 const App: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -18,6 +21,7 @@ const App: React.FC = () => {
   const [selectedObject, setSelectedObject] = useState<THREE.Mesh | null>(null);
   const [editMode, setEditMode] = useState<EditMode>('transform');
   const [transformMode, setTransformMode] = useState<'translate' | 'rotate' | 'scale'>('translate');
+  const [showScadEditor, setShowScadEditor] = useState<boolean>(false);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -59,11 +63,15 @@ const App: React.FC = () => {
     };
     animate();
 
+    // Initialize OpenSCAD service
+    scadService.initialize();
+
     // Handle window resize
     const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
+      const width = showScadEditor ? window.innerWidth * 0.6 : window.innerWidth;
+      camera.aspect = width / window.innerHeight;
       camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setSize(width, window.innerHeight);
     };
     window.addEventListener('resize', handleResize);
 
@@ -71,7 +79,7 @@ const App: React.FC = () => {
       window.removeEventListener('resize', handleResize);
       renderer.dispose();
     };
-  }, []);
+  }, [showScadEditor]);
 
   const handleImportSTL = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files || !event.target.files[0] || !sceneState.scene) return;
@@ -240,80 +248,124 @@ const App: React.FC = () => {
     setSelectedObject(newMesh);
   };
 
+  const handleScadCodeChange = async (code: string) => {
+    if (!sceneState.scene) return;
+
+    try {
+      const stlData = await scadService.compileToSTL(code);
+      const geometry = await scadService.loadSTLIntoGeometry(stlData);
+      
+      // Remove existing mesh if any
+      if (selectedObject) {
+        sceneState.scene.remove(selectedObject);
+      }
+
+      // Create new mesh
+      const material = new THREE.MeshStandardMaterial({ color: 0xcccccc });
+      const mesh = new THREE.Mesh(geometry, material);
+      
+      // Center the model
+      geometry.computeBoundingBox();
+      const center = geometry.boundingBox?.getCenter(new THREE.Vector3());
+      if (center) {
+        geometry.translate(-center.x, -center.y, -center.z);
+      }
+
+      sceneState.scene.add(mesh);
+      setSelectedObject(mesh);
+    } catch (error) {
+      console.error('Error compiling OpenSCAD:', error);
+    }
+  };
+
   return (
     <div className={styles.container}>
-      <div className={styles.toolbar}>
-        <input
-          type="file"
-          accept=".stl"
-          onChange={handleImportSTL}
-          className={styles.fileInput}
+      {showScadEditor && (
+        <ScadEditor
+          initialCode="// Example OpenSCAD code\ncube([20, 20, 20]);"
+          onCodeChange={handleScadCodeChange}
         />
-        <button onClick={handleExportSTL} className={styles.button}>
-          Export STL
-        </button>
-        <button onClick={() => addBasicShape('cube')} className={styles.button}>
-          Add Cube
-        </button>
-        <button onClick={() => addBasicShape('sphere')} className={styles.button}>
-          Add Sphere
-        </button>
-        <button onClick={() => addBasicShape('cylinder')} className={styles.button}>
-          Add Cylinder
-        </button>
-
-        <div className={styles.editControls}>
-          <select
-            value={editMode}
-            onChange={(e) => setEditMode(e.target.value as EditMode)}
-            className={styles.select}
+      )}
+      <div className={showScadEditor ? styles.viewerContainerWithEditor : styles.viewerContainer}>
+        <div className={styles.toolbar}>
+          <input
+            type="file"
+            accept=".stl"
+            onChange={handleImportSTL}
+            className={styles.fileInput}
+          />
+          <button onClick={handleExportSTL} className={styles.button}>
+            Export STL
+          </button>
+          <button onClick={() => addBasicShape('cube')} className={styles.button}>
+            Add Cube
+          </button>
+          <button onClick={() => addBasicShape('sphere')} className={styles.button}>
+            Add Sphere
+          </button>
+          <button onClick={() => addBasicShape('cylinder')} className={styles.button}>
+            Add Cylinder
+          </button>
+          <button 
+            onClick={() => setShowScadEditor(!showScadEditor)} 
+            className={styles.button}
           >
-            <option value="transform">Transform</option>
-            <option value="vertex">Vertex Edit</option>
-            <option value="face">Face Edit</option>
-            <option value="edge">Edge Edit</option>
-          </select>
+            {showScadEditor ? 'Hide SCAD Editor' : 'Show SCAD Editor'}
+          </button>
 
-          {editMode === 'transform' && (
+          <div className={styles.editControls}>
             <select
-              value={transformMode}
-              onChange={(e) => setTransformMode(e.target.value as 'translate' | 'rotate' | 'scale')}
+              value={editMode}
+              onChange={(e) => setEditMode(e.target.value as EditMode)}
               className={styles.select}
             >
-              <option value="translate">Move</option>
-              <option value="rotate">Rotate</option>
-              <option value="scale">Scale</option>
+              <option value="transform">Transform</option>
+              <option value="vertex">Vertex Edit</option>
+              <option value="face">Face Edit</option>
+              <option value="edge">Edge Edit</option>
             </select>
-          )}
 
-          <button onClick={subdivide} className={styles.button}>
-            Subdivide
-          </button>
+            {editMode === 'transform' && (
+              <select
+                value={transformMode}
+                onChange={(e) => setTransformMode(e.target.value as 'translate' | 'rotate' | 'scale')}
+                className={styles.select}
+              >
+                <option value="translate">Move</option>
+                <option value="rotate">Rotate</option>
+                <option value="scale">Scale</option>
+              </select>
+            )}
+
+            <button onClick={subdivide} className={styles.button}>
+              Subdivide
+            </button>
+          </div>
         </div>
+
+        {sceneState.scene && sceneState.camera && canvasRef.current && (
+          <>
+            {editMode === 'transform' && (
+              <TransformControls
+                scene={sceneState.scene}
+                camera={sceneState.camera}
+                domElement={canvasRef.current}
+                object={selectedObject}
+                mode={transformMode}
+              />
+            )}
+
+            {editMode === 'vertex' && (
+              <VertexEditor
+                scene={sceneState.scene}
+                selectedMesh={selectedObject}
+                onVertexUpdate={handleVertexUpdate}
+              />
+            )}
+          </>
+        )}
+        <canvas ref={canvasRef} className={styles.canvas} />
       </div>
-
-      {sceneState.scene && sceneState.camera && canvasRef.current && (
-        <>
-          {editMode === 'transform' && (
-            <TransformControls
-              scene={sceneState.scene}
-              camera={sceneState.camera}
-              domElement={canvasRef.current}
-              object={selectedObject}
-              mode={transformMode}
-            />
-          )}
-
-          {editMode === 'vertex' && (
-            <VertexEditor
-              scene={sceneState.scene}
-              selectedMesh={selectedObject}
-              onVertexUpdate={handleVertexUpdate}
-            />
-          )}
-        </>
-      )}
-      <canvas ref={canvasRef} className={styles.canvas} />
     </div>
   );
 };

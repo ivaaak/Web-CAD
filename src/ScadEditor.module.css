@@ -1,0 +1,9 @@
+.editorContainer {
+    width: 40%;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    border-right: 1px solid #333;
+    background: #1e1e1e;
+  }
