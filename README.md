@@ -1,7 +1,7 @@
 Basic CAD web application using React and Three.js. Here are the key components and features:
 
 **Screenshots:**
-<img src="https://github.com/ivaaak/web-cad/blob/main/src/assets/screenshots/1.png?raw=true"></img>
+<img src="https://raw.githubusercontent.com/ivaaak/Web-CAD/refs/heads/main/src/assets/1.png?token=GHSAT0AAAAAACW2SS5X5JJ7YLF6B77HG2T2Z527QFQ"></img>
 
 **Core Technologies:**
 
