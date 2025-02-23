@@ -1,7 +1,9 @@
-Basic CAD web application using React and Three.js. Here are the key components and features:
+Basic CAD web application using React and Three.js. 
 
-**Screenshots:**
-<img src="https://raw.githubusercontent.com/ivaaak/Web-CAD/refs/heads/main/src/assets/1.png?token=GHSAT0AAAAAACW2SS5X5JJ7YLF6B77HG2T2Z527QFQ"></img>
+**Screenshot:**
+<img src="https://raw.githubusercontent.com/ivaaak/Web-CAD/refs/heads/main/src/assets/1.png"></img>
+
+### Here are the key components and features:
 
 **Core Technologies:**
 
